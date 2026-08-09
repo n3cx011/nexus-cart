@@ -1,7 +1,9 @@
-package com.nexuscart.repository;
+package com.nexuscart.auth_service.repository;
 
-import com.nexuscart.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.nexuscart.auth_service.model.User;
+
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<User, Long> {

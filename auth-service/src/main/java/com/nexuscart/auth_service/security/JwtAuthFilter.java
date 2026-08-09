@@ -1,4 +1,4 @@
-package com.nexuscart.security;
+package com.nexuscart.auth_service.security;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

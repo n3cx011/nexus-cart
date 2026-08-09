@@ -1,7 +1,8 @@
-package com.nexuscart.controller;
+package com.nexuscart.auth_service.controller;
 
-import com.nexuscart.model.User;
-import com.nexuscart.service.AuthService;
+import com.nexuscart.auth_service.model.User;
+import com.nexuscart.auth_service.service.AuthService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,6 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/auth")
+@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
     @Autowired
     private AuthService authService;

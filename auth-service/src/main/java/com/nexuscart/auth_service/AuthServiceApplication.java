@@ -1,4 +1,4 @@
-package com.nexuscart;
+package com.nexuscart.auth_service;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

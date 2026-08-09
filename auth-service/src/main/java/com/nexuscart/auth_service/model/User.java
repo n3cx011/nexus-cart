@@ -1,4 +1,4 @@
-package com.nexuscart.model;
+package com.nexuscart.auth_service.model;
 
 import jakarta.persistence.*;
 import lombok.*;

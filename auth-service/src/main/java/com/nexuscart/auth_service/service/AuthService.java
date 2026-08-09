@@ -1,12 +1,13 @@
-package com.nexuscart.service;
+package com.nexuscart.auth_service.service;
 
-import com.nexuscart.model.User;
-import com.nexuscart.repository.UserRepository;
+import com.nexuscart.auth_service.model.User;
+import com.nexuscart.auth_service.repository.UserRepository;
+import com.nexuscart.auth_service.security.JwtUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
-import com.nexuscart.security.JwtUtil;
 
 
 @Service
