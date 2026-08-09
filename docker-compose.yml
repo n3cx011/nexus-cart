@@ -58,6 +58,7 @@ services:
 
 volumes:
   auth_pgdata:
+  order_pgdata:
 
 networks:
   nexus-network:
