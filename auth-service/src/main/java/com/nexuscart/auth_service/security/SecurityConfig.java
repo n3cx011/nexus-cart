@@ -1,7 +1,5 @@
-package com.nexuscart.auth_service;
+package com.nexuscart.auth_service.security;
 
-import com.nexuscart.security.JwtAuthFilter;
-import com.nexuscart.security.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

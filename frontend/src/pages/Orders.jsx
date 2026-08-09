@@ -7,7 +7,6 @@ export default function Orders() {
   const [totalPrice, setTotalPrice] = useState('');
   const username = localStorage.getItem('username') || 'yasas';
 
-  // Fetch orders on load
   useEffect(() => {
     fetchOrders();
   }, []);
@@ -27,54 +26,91 @@ export default function Orders() {
       await orderApi.post('/orders', {
         username,
         totalPrice: parseFloat(totalPrice),
-        productIds: [101, 102] // Placeholder product IDs until product-service is ready
+        productIds: [101, 102],
+        status: "PENDING"
       });
       setTotalPrice('');
-      fetchOrders(); // Refresh list
+      fetchOrders();
     } catch (err) {
       console.error('Error creating order:', err);
     }
   };
 
   return (
-    <div style={{ padding: '40px', fontFamily: 'Arial' }}>
-      <Link to="/dashboard">&larr; Back to Dashboard</Link>
-      <h2>Order Management</h2>
+    <div className="min-h-screen bg-slate-950 text-white p-8">
+      <div className="max-w-5xl mx-auto">
+        <Link to="/dashboard" className="text-indigo-400 hover:text-indigo-300 text-sm font-medium inline-block mb-6">
+          &larr; Back to Dashboard
+        </Link>
 
-      {/* Create Order Form */}
-      <form onSubmit={handleCreateOrder} style={{ marginBottom: '30px', padding: '15px', border: '1px solid #ddd', width: '300px' }}>
-        <h3>Create New Order</h3>
-        <div style={{ marginBottom: '10px' }}>
-          <label>Total Price ($):</label>
-          <input type="number" value={totalPrice} onChange={(e) => setTotalPrice(e.target.value)} required style={{ width: '100%', padding: '6px' }} />
+        <div className="flex justify-between items-center mb-8">
+          <h1 className="text-2xl font-bold tracking-tight">Order Management</h1>
         </div>
-        <button type="submit" style={{ padding: '8px 15px', backgroundColor: '#28a745', color: 'white', border: 'none' }}>Submit Order</button>
-      </form>
 
-      {/* Orders List Table */}
-      <h3>Existing Orders</h3>
-      <table border="1" cellPadding="10" style={{ borderCollapse: 'collapse', width: '100%' }}>
-        <thead>
-          <tr style={{ backgroundColor: '#f2f2f2' }}>
-            <th>Order ID</th>
-            <th>Username</th>
-            <th>Total Price</th>
-            <th>Status</th>
-            <th>Product IDs</th>
-          </tr>
-        </thead>
-        <tbody>
-          {orders.map((order) => (
-            <tr key={order.id}>
-              <td>{order.id}</td>
-              <td>{order.username}</td>
-              <td>${order.totalPrice}</td>
-              <td>{order.status}</td>
-              <td>{order.productIds?.join(', ')}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Create Form */}
+          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 h-fit">
+            <h3 className="text-lg font-semibold mb-4">Create New Order</h3>
+            <form onSubmit={handleCreateOrder} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-300 mb-2">Total Price ($)</label>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={totalPrice}
+                  onChange={(e) => setTotalPrice(e.target.value)}
+                  required
+                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-white focus:outline-none focus:border-indigo-500"
+                  placeholder="0.00"
+                />
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-medium py-2.5 rounded-lg transition-colors shadow-lg shadow-emerald-600/20"
+              >
+                Submit Order
+              </button>
+            </form>
+          </div>
+
+          {/* Orders Table */}
+          <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-6 overflow-x-auto">
+            <h3 className="text-lg font-semibold mb-4">Existing Orders</h3>
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="border-b border-slate-800 text-slate-400 text-sm">
+                  <th className="pb-3 font-medium">ID</th>
+                  <th className="pb-3 font-medium">User</th>
+                  <th className="pb-3 font-medium">Price</th>
+                  <th className="pb-3 font-medium">Status</th>
+                  <th className="pb-3 font-medium">Products</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-800/60 text-sm">
+                {orders.length === 0 ? (
+                  <tr>
+                    <td colSpan="5" className="py-6 text-center text-slate-500">No orders found.</td>
+                  </tr>
+                ) : (
+                  orders.map((order) => (
+                    <tr key={order.id} className="hover:bg-slate-800/30">
+                      <td className="py-3.5 text-slate-300 font-mono">#{order.id}</td>
+                      <td className="py-3.5 text-slate-300">{order.username}</td>
+                      <td className="py-3.5 font-semibold text-emerald-400">${order.totalPrice}</td>
+                      <td className="py-3.5">
+                        <span className="bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs px-2.5 py-1 rounded-full font-medium">
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="py-3.5 text-slate-400 font-mono text-xs">{order.productIds?.join(', ')}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
