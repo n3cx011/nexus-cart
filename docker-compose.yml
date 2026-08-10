@@ -1,6 +1,9 @@
 version: '3.8'
 
 services:
+
+#Authentication Service and Database
+
   auth-db:
     image: postgres:15-alpine
     container_name: auth-db
@@ -29,6 +32,37 @@ services:
     networks:
       - nexus-network
 
+#Product Service and Database
+
+  product-db:
+    image: postgres:15-alpine
+    container_name: product-db
+    ports:
+      - "5435:5432"
+    environment:
+      POSTGRES_DB: nexus_product_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - product_pgdata:/var/lib/postgresql/data
+    networks:
+      - nexus-network
+
+  product-service:
+    build: ./product-service
+    container_name: product-service
+    ports:
+      - "8082:8080"
+    environment:
+      - DB_HOST=product-db
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://product-db:5432/nexus_product_db
+    depends_on:
+      - product-db
+    networks:
+      - nexus-network
+
+#Order Service and Database
+
   order-db:
     image: postgres:15-alpine
     container_name: order-db
@@ -56,9 +90,39 @@ services:
     networks:
       - nexus-network
 
+#Payment Service and Database
+
+  payment-db:
+    image: postgres:15-alpine
+    container_name: payment-db
+    ports:
+      - "5436:5432"
+    environment:
+      POSTGRES_DB: nexus_payment_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - payment_pgdata:/var/lib/postgresql/data
+    networks:
+      - nexus-network
+
+  payment-service:
+    build: ./payment-service
+    container_name: payment-service
+    ports:
+      - "8084:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://payment-db:5432/nexus_payment_db
+    depends_on:
+      - payment-db
+    networks:
+      - nexus-network
+
 volumes:
   auth_pgdata:
   order_pgdata:
+  product_pgdata:
+  payment_pgdata:
 
 networks:
   nexus-network:
