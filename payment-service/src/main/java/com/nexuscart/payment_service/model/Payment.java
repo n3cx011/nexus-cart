@@ -15,6 +15,8 @@ public class Payment {
     private Double amount;
     private String paymentStatus; // e.g., SUCCESS, FAILED
     private String paymentMethod; // e.g., CREDIT_CARD, CASH
+    private String transactionId;
+    private String status; // e.g., PENDING, COMPLETED
 
     public Payment() {}
 
