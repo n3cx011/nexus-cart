@@ -22,7 +22,7 @@ services:
     build: ./auth-service
     container_name: auth-service
     ports:
-      - "8081:8080"
+      - "8081:8081"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://auth-db:5432/nexus_auth_db
       - SPRING_DATASOURCE_USERNAME=postgres
@@ -52,7 +52,7 @@ services:
     build: ./product-service
     container_name: product-service
     ports:
-      - "8082:8080"
+      - "8082:8082"
     environment:
       - DB_HOST=product-db
       - SPRING_DATASOURCE_URL=jdbc:postgresql://product-db:5432/nexus_product_db
@@ -81,7 +81,7 @@ services:
     build: ./order-service
     container_name: order-service
     ports:
-      - "8083:8080"
+      - "8083:8083"
     environment:
       - DB_HOST=order-db
       - SPRING_DATASOURCE_URL=jdbc:postgresql://order-db:5432/nexus_order_db
@@ -110,7 +110,7 @@ services:
     build: ./payment-service
     container_name: payment-service
     ports:
-      - "8084:8080"
+      - "8084:8084"
     environment:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://payment-db:5432/nexus_payment_db
     depends_on:
