@@ -14,9 +14,10 @@ public class Payment {
     private Long orderId;
     private Double amount;
     private String paymentStatus; // e.g., SUCCESS, FAILED
-    private String paymentMethod; // e.g., CREDIT_CARD, CASH
+    private String paymentMethod;
+    private String status;
     private String transactionId;
-    private String status; // e.g., PENDING, COMPLETED
+     // e.g., CREDIT_CARD, CASH
 
     public Payment() {}
 
