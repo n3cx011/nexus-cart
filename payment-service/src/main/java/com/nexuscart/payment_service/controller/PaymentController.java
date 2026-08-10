@@ -28,7 +28,7 @@ public class PaymentController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @PostMapping
+    @PostMapping("/process")
     public Payment processPayment(@RequestBody Payment payment) {
         return paymentService.processPayment(payment);
     }

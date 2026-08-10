@@ -17,7 +17,7 @@ export default function Login() {
       const response = await authApi.post('/auth/login', { username, password });
       localStorage.setItem('token', response.data.token || 'dummy-token');
       localStorage.setItem('username', username);
-      navigate('/dashboard');
+      navigate('/shop');
     } catch (err) {
       setError('Invalid username or password.');
     } finally {
