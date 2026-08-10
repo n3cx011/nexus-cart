@@ -1,11 +1,11 @@
 server:
-  port: 8081
+  port: 8084
 
 spring:
   application:
-    name: product-service
+    name: payment-service
   datasource:
-    url: jdbc:postgresql://product-db:5432/nexus_product_db
+    url: jdbc:postgresql://${DB_HOST:localhost}:5435/nexus_payment_db
     username: postgres
     password: password
   jpa:
@@ -14,4 +14,4 @@ spring:
     show-sql: true
     properties:
       hibernate:
-      dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: org.hibernate.dialect.PostgreSQLDialect
