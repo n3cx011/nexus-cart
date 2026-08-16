@@ -1,30 +1,35 @@
 import axios from 'axios';
 
 const API_KEY = 'NEXUS_SECURE_API_KEY_2026';
+const GATEWAY_URL = 'http://localhost:8080';
 
-export const authApi 
-= axios.create({ baseURL: 'http://localhost:8081',
-  headers: { 'X-API-KEY': API_KEY } });
+// Helper function to create standard Gateway-bound Axios instances
+const createGatewayClient = () => {
+  const instance = axios.create({
+    baseURL: GATEWAY_URL,
+    headers: {
+      'Content-Type': 'application/json',
+      'X-API-KEY': API_KEY,
+    },
+  });
 
-export const productApi 
-= axios.create({ baseURL: 'http://localhost:8082',
-  headers: { 'X-API-KEY': API_KEY } });
+  // Automatically inject JWT Bearer token into outgoing requests
+  instance.interceptors.request.use(
+    (config) => {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
 
-export const orderApi 
-= axios.create({ baseURL: 'http://localhost:8083',
-  headers: { 'X-API-KEY': API_KEY } });
+  return instance;
+};
 
-export const paymentApi 
-= axios.create({ baseURL: 'http://localhost:8084',
-  headers: { 'X-API-KEY': API_KEY } });
-
-// Automatically inject JWT token into headers if available
-[authApi, productApi, orderApi].forEach(api => {
-    api.interceptors.request.use(config => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    });
-});
+// Export individual service clients targeted at the API Gateway
+export const authApi = createGatewayClient();
+export const productApi = createGatewayClient();
+export const orderApi = createGatewayClient();
+export const paymentApi = createGatewayClient();

@@ -2,6 +2,8 @@ package com.nexuscart.auth_service.controller;
 
 import com.nexuscart.auth_service.model.User;
 import com.nexuscart.auth_service.repository.UserRepository;
+import com.nexuscart.auth_service.security.JwtUtil;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,11 +14,14 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/auth")
-@CrossOrigin(origins = "http://localhost:5173")
+//@CrossOrigin(origins = "http://localhost:5173")
 public class AuthController {
 
     @Autowired
     private UserRepository userRepository;
+
+    @Autowired
+    private JwtUtil jwtUtil;
 
     // Endpoint 1: Register User
     @PostMapping("/register")
@@ -33,10 +38,13 @@ public class AuthController {
     public ResponseEntity<?> loginUser(@RequestBody User loginReq) {
         Optional<User> userOpt = userRepository.findByUsername(loginReq.getUsername());
         if (userOpt.isPresent() && userOpt.get().getPassword().equals(loginReq.getPassword())) {
+            String token = jwtUtil.generateToken(userOpt.get().getUsername());
+
             return ResponseEntity.ok(Map.of(
-                "message", "Login successful",
-                "username", userOpt.get().getUsername()
-            ));
+            "token", token,
+            "type", "Bearer",
+            "username", userOpt.get().getUsername()
+        ));
         }
         return ResponseEntity.status(401).body("Invalid username or password");
     }
