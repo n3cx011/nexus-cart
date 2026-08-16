@@ -4,6 +4,10 @@ import com.nexuscart.auth_service.model.User;
 import com.nexuscart.auth_service.repository.UserRepository;
 import com.nexuscart.auth_service.security.JwtUtil;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +19,7 @@ import java.util.Optional;
 @RestController
 @RequestMapping("/auth")
 //@CrossOrigin(origins = "http://localhost:5173")
+@Tag(name = "Authentication Controller", description = "Endpoints for user registration and JWT token login")
 public class AuthController {
 
     @Autowired
@@ -23,6 +28,10 @@ public class AuthController {
     @Autowired
     private JwtUtil jwtUtil;
 
+    @Operation(summary = "Authenticate User", description = "Validates user credentials and returns a signed JWT token.")
+    @ApiResponse(responseCode = "200", description = "Successfully authenticated")
+    @ApiResponse(responseCode = "401", description = "Invalid credentials or missing API Key")
+    
     // Endpoint 1: Register User
     @PostMapping("/register")
     public ResponseEntity<?> registerUser(@RequestBody User user) {

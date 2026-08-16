@@ -33,6 +33,9 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+
+	// OpenAPI 3.0 / Swagger UI dependency
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.3.0'
 }
 
 tasks.named('test') {

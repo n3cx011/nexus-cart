@@ -14,13 +14,14 @@ spring:
         - id: auth-service
           uri: http://auth-service:8081
           predicates:
-            - Path=/auth/**
+            - Path=/auth/**, /v3/api-docs/auth
           filters:
             - name: RequestRateLimiter
               args:
                 redis-rate-limiter.replenishRate: 10
                 redis-rate-limiter.burstCapacity: 20
                 key-resolver: "#{@userRemoteAddressResolver}"
+            - RewritePath=/v3/api-docs/auth, /v3/api-docs
 
         - id: product-service
           uri: http://product-service:8082
@@ -54,3 +55,10 @@ spring:
                 redis-rate-limiter.replenishRate: 10
                 redis-rate-limiter.burstCapacity: 20
                 key-resolver: "#{@userRemoteAddressResolver}"
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    urls:
+      - name: Auth Service
+        url: /v3/api-docs/auth
