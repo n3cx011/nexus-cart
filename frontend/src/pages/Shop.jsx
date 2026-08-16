@@ -44,6 +44,19 @@ export default function Shop({ addToCart }) {
     }
   };
 
+  const handleDeleteProduct = async (productId) => {
+  if (!window.confirm("Are you sure you want to delete this product?")) return;
+
+  try {
+    await productApi.delete(`/products/${productId}`);
+    // Refresh product list from product-service
+    loadProducts();
+  } catch (err) {
+    console.error("Failed to delete product", err);
+    alert("Could not delete product. Check product-service connection.");
+  }
+};
+
   const filteredProducts = products.filter(p =>
     p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.description?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -61,7 +74,7 @@ export default function Shop({ addToCart }) {
         </div>
         <div className="flex items-center gap-6 text-sm font-medium">
           <Link to="/shop" className="text-emerald-400 font-semibold">Shop</Link>
-          <Link to="/checkout" className="text-slate-400 hover:text-slate-200 transition-colors">Cart & Checkout</Link>
+          <Link to="/cart" className="text-slate-400 hover:text-slate-200 transition-colors">Cart</Link>
           <button 
             onClick={() => navigate('/')} 
             className="text-rose-400 hover:text-rose-300 transition-colors text-xs font-mono uppercase tracking-wider cursor-pointer"
@@ -104,29 +117,40 @@ export default function Shop({ addToCart }) {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {filteredProducts.map(product => (
-              <div key={product.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-700 transition-all group">
-                <div>
-                  <div className="w-full h-44 bg-slate-950 rounded-xl mb-4 overflow-hidden flex items-center justify-center border border-slate-800/50">
-                    {product.imageUrl ? (
-                      <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-                    ) : (
-                      <span className="text-xs font-mono text-slate-600">NO IMAGE</span>
-                    )}
-                  </div>
-                  <h3 className="font-semibold text-white text-base group-hover:text-emerald-400 transition-colors">{product.name}</h3>
-                  <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">{product.description || "No description provided."}</p>
-                </div>
-                <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between">
-                  <span className="text-base font-mono font-bold text-emerald-400">${Number(product.price || 0).toFixed(2)}</span>
-                  <button
-                    onClick={() => addToCart(product)}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
-                  >
-                    Add to Cart
-                  </button>
-                </div>
-              </div>
-            ))}
+  <div key={product.id} className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-between hover:border-slate-700 transition-all group relative">
+    
+    {/* Delete Button (Top Right of Card) */}
+    <button
+      onClick={() => handleDeleteProduct(product.id)}
+      className="absolute top-3 right-3 text-slate-500 hover:text-rose-400 bg-slate-950/80 hover:bg-rose-500/10 border border-slate-800 hover:border-rose-500/20 w-7 h-7 rounded-full flex items-center justify-center text-xs transition-all cursor-pointer z-10"
+      title="Delete Product"
+    >
+      ✕
+    </button>
+
+    <div>
+      <div className="w-full h-48 bg-slate-950 rounded-xl mb-4 overflow-hidden flex items-center justify-center border border-slate-800/50">
+        {product.imageUrl ? (
+          <img src={product.imageUrl} alt={product.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+        ) : (
+          <span className="text-xs font-mono text-slate-600">NO IMAGE</span>
+        )}
+      </div>
+      <h3 className="font-semibold text-white text-base group-hover:text-emerald-400 transition-colors">{product.name}</h3>
+      <p className="text-xs text-slate-400 mt-1 line-clamp-2 leading-relaxed">{product.description || "No description provided."}</p>
+    </div>
+
+    <div className="mt-6 pt-4 border-t border-slate-800/80 flex items-center justify-between">
+      <span className="text-base font-mono font-bold text-emerald-400">${Number(product.price || 0).toFixed(2)}</span>
+      <button
+        onClick={() => addToCart(product)}
+        className="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all shadow-md shadow-emerald-600/20 cursor-pointer"
+      >
+        Add to Cart
+      </button>
+    </div>
+  </div>
+))}
           </div>
         )}
       </main>

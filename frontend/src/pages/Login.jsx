@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authApi } from '../services/api';
 
-export default function Login() {
+export default function Login({ onLoginSuccess }) {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -10,20 +10,26 @@ export default function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    setError('');
-    setIsLoading(true);
-    try {
-      const response = await authApi.post('/auth/login', { username, password });
-      localStorage.setItem('token', response.data.token || 'dummy-token');
-      localStorage.setItem('username', username);
-      navigate('/shop');
-    } catch (err) {
-      setError('Invalid username or password.');
-    } finally {
-      setIsLoading(false);
+  e.preventDefault();
+  setIsLoading(true);
+  setError('');
+  try {
+    await authApi.post('/auth/login', { username, password });
+    
+    // Update global state and localStorage
+    if (onLoginSuccess) {
+      onLoginSuccess(username);
+    } else {
+      localStorage.setItem('currentUser', username);
     }
-  };
+
+    navigate('/shop');
+  } catch (err) {
+    setError('Invalid username or password.');
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div className="fixed inset-0 w-screen h-screen flex bg-slate-950 overflow-hidden">

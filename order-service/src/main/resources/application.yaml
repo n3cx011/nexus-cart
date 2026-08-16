@@ -15,3 +15,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+
+    app:
+      api:
+        key: NEXUS_SECURE_API_KEY_2026
