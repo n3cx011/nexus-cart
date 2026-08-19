@@ -8,6 +8,7 @@ import Checkout from './pages/Checkout';
 import { orderApi } from './services/api';
 
 export default function App() {
+  
   const [username, setUsername] = useState(() => localStorage.getItem('currentUser') || '');
   const [cart, setCart] = useState([]);
 

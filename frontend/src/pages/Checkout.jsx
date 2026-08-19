@@ -12,6 +12,9 @@ export default function Checkout({ cart, clearCart }) {
     if (cart.length === 0) return;
     setIsProcessing(true);
 
+    // Get username from localStorage (fallback to 'yasas' if null)
+    const username = localStorage.getItem('currentUser') || localStorage.getItem('username') || 'yasas';
+
     try {
       const orderPayload = {
         userId: username,
@@ -54,7 +57,10 @@ export default function Checkout({ cart, clearCart }) {
           <Link to="/shop" className="text-slate-400 hover:text-slate-200 transition-colors">Shop</Link>
           <Link to="/cart" className="text-slate-400 hover:text-slate-200 transition-colors">Cart</Link>
           <button 
-            onClick={() => navigate('/')} 
+            onClick={() => {
+              localStorage.clear();
+              navigate('/');
+            }} 
             className="text-rose-400 hover:text-rose-300 transition-colors text-xs font-mono uppercase tracking-wider cursor-pointer"
           >
             Logout
