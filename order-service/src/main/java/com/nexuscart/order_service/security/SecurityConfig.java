@@ -22,8 +22,13 @@ public class SecurityConfig {
             .cors(cors -> cors.disable())
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll() // Permit all requests for this service so frontend can checkout smoothly
-            );
+            .requestMatchers(
+                "/v3/api-docs/**",
+                "/swagger-ui/**",
+                "/swagger-ui.html"
+            ).permitAll()
+            .anyRequest().authenticated()
+        );
 
         return http.build();
     }

@@ -16,13 +16,17 @@ public class ApiKeyFilter extends OncePerRequestFilter {
     @Value("${app.api.key:NEXUS_SECURE_API_KEY_2026}")
     private String expectedApiKey;
 
-    @Override
+        @Override
     protected void doFilterInternal(HttpServletRequest request, 
                                     HttpServletResponse response, 
                                     FilterChain filterChain) throws ServletException, IOException {
         
-        // Pass through CORS pre-flight requests safely
-        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+        String path = request.getRequestURI();
+
+        // Bypass CORS pre-flight requests and OpenAPI/Swagger requests
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod()) || 
+            path.contains("/v3/api-docs") || 
+            path.contains("/swagger-ui")) {
             filterChain.doFilter(request, response);
             return;
         }

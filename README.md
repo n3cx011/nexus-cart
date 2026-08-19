@@ -1,66 +1,93 @@
-﻿# 🛒 NexusCart
+﻿# 🛒 Nexus Cart - Microservices E-Commerce Platform
 
-A full-stack, microservices-based e-commerce application built with **Spring Boot** backends and a **React** frontend. NexusCart demonstrates a Service-Oriented Architecture (SOA) with independently deployable services for authentication, product management, order/cart management, and payments.
+A fully containerized microservices-based e-commerce platform built with **Spring Boot**, **Spring Cloud Gateway**, **React (Vite)**, **PostgreSQL**, and **Redis**.
+
+NexusCart demonstrates a Service-Oriented Architecture (SOA) and Enterprise Microservices Patterns, featuring centralized routing, rate limiting, independent domain databases, interactive OpenAPI documentation, and end-to-end security filtering.
 
 ---
 
 ## 📐 Architecture Overview
 
-```
-┌─────────────────────────────────────────────────────────┐
-│                    React Frontend (Vite)                 │
-│              http://localhost:5173                        │
-└───────┬────────────┬────────────┬──────────────┬─────────┘
-        │            │            │              │
-        ▼            ▼            ▼              ▼
-┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────┐
-│  Auth    │ │ Product  │ │  Order   │ │   Payment    │
-│ Service  │ │ Service  │ │ Service  │ │   Service    │
-│ :8081    │ │ :8082    │ │  :8083   │ │    :8084     │
-└────┬─────┘ └────┬─────┘ └────┬─────┘ └──────┬───────┘
-     │            │            │              │
-     ▼            ▼            ▼              ▼
-┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────────┐
-│ auth-db  │ │product-db│ │ order-db │ │  payment-db  │
-│ :5433    │ │  :5435   │ │  :5434   │ │    :5436     │
-│(Postgres)│ │(Postgres)│ │(Postgres)│ │  (Postgres)  │
-└──────────┘ └──────────┘ └──────────┘ └──────────────┘
+```mermaid
+graph TD
+    Client[React Client SPA<br/>Port: 5173] -->|HTTP / REST| Gateway[API Gateway<br/>Port: 8080]
+    
+    subgraph Infrastructure Layer
+        Redis[(Redis Cache<br/>Port: 6379)]
+    end
+
+    Gateway -->|Rate Limiting & CORS| Redis
+    
+    subgraph Microservices Layer
+        Gateway -->|/auth/**| Auth[Auth Service<br/>Port: 8081]
+        Gateway -->|/products/**| Product[Product Service<br/>Port: 8082]
+        Gateway -->|/orders/**, /cart/**| Order[Order Service<br/>Port: 8083]
+        Gateway -->|/payments/**| Payment[Payment Service<br/>Port: 8084]
+    end
+
+    subgraph Data Layer
+        AuthDB[(Auth DB<br/>PostgreSQL: 5433)]
+        ProductDB[(Product DB<br/>PostgreSQL: 5435)]
+        OrderDB[(Order DB<br/>PostgreSQL: 5434)]
+        PaymentDB[(Payment DB<br/>PostgreSQL: 5436)]
+    end
+
+    Auth --> AuthDB
+    Product --> ProductDB
+    Order --> OrderDB
+    Payment --> PaymentDB
 ```
 
-All services communicate over a shared **Docker bridge network** (`nexus-network`).
+All services communicate over a shared, isolated Docker bridge network (`nexus-network`).
 
 ---
 
-## 🚀 Services
+## 🚀 Services & Ports
 
 | Service | Port | Description | Database Port |
 |---|---|---|---|
-| **auth-service** | `8081` | User registration, login & JWT issuance | `5433` |
-| **product-service** | `8082` | Product catalog CRUD | `5435` |
-| **order-service** | `8083` | Cart & order management | `5434` |
-| **payment-service** | `8084` | Payment processing | `5436` |
-| **frontend** | `5173` | React SPA (Vite dev server) | — |
+| **api-gateway** | `8080` | Centralized Gateway (Routing, CORS, Rate Limiting, Swagger Aggregation) | — |
+| **auth-service** | `8081` | User registration, authentication & OAuth 2.0 / JWT issuance | `5433` |
+| **product-service** | `8082` | Product catalog CRUD & inventory management | `5435` |
+| **order-service** | `8083` | Persistent shopping cart & order processing | `5434` |
+| **payment-service** | `8084` | Payment processing pipeline | `5436` |
+| **frontend** | `5173` | React SPA (Vite dev server / Nginx production container) | — |
+| **redis-cache** | `6379` | Token-bucket rate limiter storage | — |
 
 ---
 
 ## 🛠️ Tech Stack
 
-### Backend (all 4 services)
-- **Java** with **Spring Boot 4.1.0**
-- **Spring Security** (auth & order services)
+### Backend & Infrastructure
+- **Java 21** with **Spring Boot 3.x**
+- **Spring Cloud Gateway** – Netty-based reactive edge routing & global CORS filtering
+- **Redis** – Distributed request rate limiting (`RequestRateLimiter` filter)
+- **Spring Security** – OAuth 2.0 & JWT authentication filtering
 - **Spring Data JPA** with **Hibernate**
-- **PostgreSQL** – dedicated DB per service
-- **Lombok** – boilerplate reduction
-- **JJWT 0.11.5** – JWT token generation & validation (auth service)
-- **Gradle** – build tool
-- **Docker** – containerisation
+- **PostgreSQL 16** – Database-per-service pattern
+- **OpenAPI 3.0 / Swagger UI (`springdoc-openapi`)** – Interactive API documentation
+- **Lombok** – Boilerplate reduction
+- **JJWT 0.11.5** – JWT generation and parsing
+- **Gradle** – Multi-project build automation
+- **Docker & Docker Compose** – Containerization & multi-container orchestration
 
 ### Frontend
-- **React 19** with **Vite 8**
-- **React Router DOM v7** – client-side routing
-- **Axios** – HTTP client with JWT interceptor
-- **Tailwind CSS v4** – utility-first styling
-- **Lucide React** – icon library
+- **React 18 / 19** with **Vite**
+- **React Router DOM** – Single Page Application (SPA) client-side routing
+- **Axios** – Centralized HTTP client with request/response interceptors for API Key & Bearer Token injection
+- **Tailwind CSS** – Utility-first UI styling
+- **Lucide React** – Component icons
+
+---
+
+## 👥 Team Individual Contributions
+
+| Team Member | Role | Assigned Components | Key Deliverables & Technical Contribution |
+| :--- | :--- | :--- | :--- |
+| **ITBNM-2313-0061** | Team Lead / Backend Architect | API Gateway, Auth Service & Security Infrastructure, React Frontend Client | • Configured Spring Cloud API Gateway routing predicates and Netty reactive engine.<br>• Implemented OAuth 2.0 JWT issuance and validation via `JwtUtil`.<br>• Implemented central `X-API-KEY` security filtering and global CORS setup.<br>• Dockerized microservice environment and orchestrated multi-container setup via Docker Compose.<br>• Built frontend UI views for authentication, product showcase, and checkout flow. |
+| **ITBIN-2313-0135** | Microservice Developer | Product Service & Database Integration | • Designed `product-db` schema and PostgreSQL entity mappings.<br>• Built catalog management REST endpoints (`GET /products`, `GET /products/{id}`).<br>• Integrated service-level `ApiKeyFilter` validation. |
+| **ITBIN-2313-0056** | Microservice Developer | Order Service & Cart Management | • Implemented persistent shopping cart endpoints (`/cart/**`) and checkout logic (`/orders/checkout`).<br>• Designed relational schema for orders and `cart_items` in `order-db`.<br>• Integrated JWT authorization checking across order routes. |
+| **ITBIN-2313-0023** | Full-Stack / Microservice Developer | Payment Service | • Developed `payment-service` processing pipeline and payments schema in `payment-db`.<br>• Configured central Axios client (`api.js`) with request interceptors for dynamic JWT and API Key injection. |
 
 ---
 
@@ -68,24 +95,30 @@ All services communicate over a shared **Docker bridge network** (`nexus-network
 
 ```
 nexus-cart/
-├── docker-compose.yml          # Orchestrates all services & databases
-├── auth-service/               # Spring Boot – authentication & JWT
-│   ├── src/
+├── docker-compose.yml           # Orchestrates gateway, microservices, databases & Redis
+├── README.md                    # System documentation & architectural reference
+├── api-gateway/                 # Spring Cloud Gateway (Port 8080)
+│   ├── src/main/resources/
+│   │   └── application.yaml     # Routes, Redis rate-limiting & Swagger aggregation config
 │   ├── build.gradle
-│   └── dockerfile
-├── product-service/            # Spring Boot – product catalog
+│   └── Dockerfile
+├── auth-service/                # Spring Boot – Auth & JWT (Port 8081)
 │   ├── src/
 │   ├── build.gradle
 │   └── Dockerfile
-├── order-service/              # Spring Boot – cart & orders
+├── product-service/             # Spring Boot – Catalog (Port 8082)
 │   ├── src/
 │   ├── build.gradle
 │   └── Dockerfile
-├── payment-service/            # Spring Boot – payments
+├── order-service/               # Spring Boot – Cart & Orders (Port 8083)
 │   ├── src/
 │   ├── build.gradle
-│   └── dockerfile
-└── frontend/                   # React + Vite SPA
+│   └── Dockerfile
+├── payment-service/             # Spring Boot – Payments (Port 8084)
+│   ├── src/
+│   ├── build.gradle
+│   └── Dockerfile
+└── frontend/                    # React + Vite SPA (Port 5173)
     ├── src/
     │   ├── pages/
     │   │   ├── Login.jsx
@@ -93,10 +126,9 @@ nexus-cart/
     │   │   ├── Shop.jsx
     │   │   ├── Cart.jsx
     │   │   ├── Checkout.jsx
-    │   │   ├── Orders.jsx
-    │   │   └── Dashboard.jsx
+    │   │   └── Orders.jsx
     │   ├── services/
-    │   │   └── api.js          # Axios instances per service
+    │   │   └── api.js           # Axios instance with centralized auth interceptors
     │   ├── App.jsx
     │   └── main.jsx
     ├── package.json
@@ -107,42 +139,48 @@ nexus-cart/
 
 ## ⚙️ Prerequisites
 
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (for running all services via Docker Compose)
-- [Node.js 18+](https://nodejs.org/) and npm (for the frontend)
-- [Java 17+](https://adoptium.net/) (only if running backend services locally without Docker)
+- **[Docker Desktop](https://www.docker.com/products/docker-desktop/)** (v24.0+ with Docker Compose v2+)
+- **Git**
+- **[Node.js 18+](https://nodejs.org/)** and npm (Optional, only for running frontend locally outside Docker)
+- **[Java 21 JDK](https://adoptium.net/)** (Optional, only if running backend services locally without Docker)
 
 ---
 
-## 🐳 Running with Docker Compose (Recommended)
+## 🐳 Running the Ecosystem via Docker (Recommended)
 
-This is the easiest way to spin up all backend services and their databases.
+This is the preferred single-command approach to spin up all microservices, databases, Redis, gateway, and the frontend.
 
-```bash
-# From the project root
-docker-compose up --build
-```
+1. **Clone the Repository:**
+   ```bash
+   git clone [https://github.com/your-org/nexus-cart.git](https://github.com/your-org/nexus-cart.git)
+   cd nexus-cart
+   ```
 
-This will start:
-- 4 PostgreSQL databases
-- 4 Spring Boot microservices
+2. **Build and Start All Containers:**
+   ```bash
+   docker compose up -d --build
+   ```
 
-> **Note:** First build may take several minutes while Gradle downloads dependencies and Docker builds images.
+3. **Verify Container Health:**
+   ```bash
+   docker ps
+   ```
 
-To stop all services:
-```bash
-docker-compose down
-```
+4. **Stop All Services:**
+   ```bash
+   docker compose down
+   ```
 
-To stop and remove all volumes (fresh DB state):
-```bash
-docker-compose down -v
-```
+5. **Stop and Reset Database State (Wipe Volumes):**
+   ```bash
+   docker compose down -v
+   ```
 
 ---
 
-## 💻 Running the Frontend
+## 💻 Running the Frontend Locally (Alternative)
 
-After the backend services are running, start the React dev server:
+If you wish to run the React client in local development mode outside Docker:
 
 ```bash
 cd frontend
@@ -150,140 +188,75 @@ npm install
 npm run dev
 ```
 
-The app will be available at **http://localhost:5173**
+Access the application in your browser at **http://localhost:5173**
 
 ---
 
-## 🔑 API Endpoints
+## 📚 Interactive API Documentation (Swagger UI Access URLs)
 
-### Auth Service (`http://localhost:8081`)
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/auth/register` | Register a new user |
-| `POST` | `/api/auth/login` | Login & receive a JWT token |
+All microservices export interactive OpenAPI 3.0 definitions. You can inspect endpoints per individual microservice or view the centralized dropdown aggregation at the API Gateway:
 
-### Product Service (`http://localhost:8082`)
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/api/products` | List all products |
-| `GET` | `/api/products/{id}` | Get a product by ID |
-| `POST` | `/api/products` | Create a product |
-| `PUT` | `/api/products/{id}` | Update a product |
-| `DELETE` | `/api/products/{id}` | Delete a product |
-
-### Order Service (`http://localhost:8083`)
-| Method | Endpoint | Description |
-|---|---|---|
-| `GET` | `/cart/{username}` | Get cart for a user |
-| `POST` | `/cart/{username}/add` | Add item to cart |
-| `DELETE` | `/cart/{username}/clear` | Clear user cart |
-| `POST` | `/orders` | Place an order |
-| `GET` | `/orders/{username}` | Get orders for a user |
-
-### Payment Service (`http://localhost:8084`)
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/payments` | Process a payment |
-| `GET` | `/api/payments/{orderId}` | Get payment status |
+| Component / Microservice | Interactive Swagger UI Access URL | Raw OpenAPI JSON Schema URL |
+| :--- | :--- | :--- |
+| **API Gateway (Central Aggregator)** | `http://localhost:8080/swagger-ui.html` | `http://localhost:8080/v3/api-docs` |
+| **Auth Service** | `http://localhost:8081/swagger-ui.html` | `http://localhost:8081/v3/api-docs` |
+| **Product Service** | `http://localhost:8082/swagger-ui.html` | `http://localhost:8082/v3/api-docs` |
+| **Order Service** | `http://localhost:8083/swagger-ui.html` | `http://localhost:8083/v3/api-docs` |
+| **Payment Service** | `http://localhost:8084/swagger-ui.html` | `http://localhost:8084/v3/api-docs` |
 
 ---
 
-## 🔐 Authentication
+## 🔑 Security Headers, Key Formats & Test Credentials
 
-The auth service issues **JWT tokens** upon successful login. The frontend automatically attaches the token to every subsequent request via an Axios request interceptor:
+### Mandatory Security Headers
 
-```js
-// frontend/src/services/api.js
-api.interceptors.request.use(config => {
-    const token = localStorage.getItem('token');
-    if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
-```
+All requests passing through the central API Gateway require a valid application API key header. Protected endpoints additionally validate OAuth 2.0 / JWT Bearer Tokens:
 
-Tokens are stored in `localStorage` under the key `token`. The current username is stored under `currentUser`.
+- **API Key Header:** `X-API-KEY: NEXUS_SECURE_API_KEY_2026`
+- **Authorization Header:** `Authorization: Bearer <your_jwt_token_here>`
 
----
+### Default Test Credentials
 
-## 🗄️ Database Configuration
+| Role | Username | Password | Access & Testing Details |
+| :--- | :--- | :--- | :--- |
+| **Standard User** | `yasas` | `password123` | Default customer account for shopping & cart workflows |
+| **Administrator** | `admin` | `admin123` | Privileged account for administrative access |
 
-Each service has its own isolated PostgreSQL database. The default credentials (used in Docker Compose) are:
-
-| Service | DB Name | Host (Docker) | External Port |
-|---|---|---|---|
-| auth-service | `nexus_auth_db` | `auth-db` | `5433` |
-| product-service | `nexus_product_db` | `product-db` | `5435` |
-| order-service | `nexus_order_db` | `order-db` | `5434` |
-| payment-service | `nexus_payment_db` | `payment-db` | `5436` |
-
-**Default credentials:** username `postgres`, password `password`
-
----
-
-## 🖥️ Frontend Pages
-
-| Route | Component | Description |
-|---|---|---|
-| `/` | `Login.jsx` | User login form |
-| `/register` | `Register.jsx` | New user registration |
-| `/shop` | `Shop.jsx` | Browse product catalog & add to cart |
-| `/cart` | `Cart.jsx` | View & manage shopping cart |
-| `/checkout` | `Checkout.jsx` | Review order & proceed to payment |
-
----
-
-## 🏗️ Building Backend Services Individually
-
-Each Spring Boot service can be built independently using Gradle:
+### Sample Testing Request (`curl`)
 
 ```bash
-# Example for auth-service
-cd auth-service
-./gradlew build
-
-# Run locally (requires a local PostgreSQL instance)
-./gradlew bootRun
+curl -X GET http://localhost:8080/products \
+  -H "X-API-KEY: NEXUS_SECURE_API_KEY_2026" \
+  -H "Authorization: Bearer <YOUR_JWT_TOKEN>"
 ```
 
 ---
 
-## 📦 Environment Variables
+## 🗄️ Database & Infrastructure Configuration
 
-The following environment variables can be configured for each backend service (set via Docker Compose or system env):
+Each microservice maintains strict data isolation using dedicated PostgreSQL database instances:
 
-| Variable | Service | Description |
-|---|---|---|
-| `SPRING_DATASOURCE_URL` | All | JDBC connection URL |
-| `SPRING_DATASOURCE_USERNAME` | auth-service | DB username |
-| `SPRING_DATASOURCE_PASSWORD` | auth-service | DB password |
-| `DB_HOST` | product/order service | Database hostname |
-
----
-
-## 📚 Course Context
-
-This project was developed as a **Mini Project** for **IT41073 – Service Oriented Computing** (Semester 6). It demonstrates key SOA and microservices principles:
-
-- **Loose coupling** – services communicate via REST APIs
-- **High cohesion** – each service owns a single business domain
-- **Database per service** – no shared data stores
-- **Independent deployability** – each service has its own Dockerfile
-- **Technology heterogeneity** – same stack but independently configurable
+| Microservice | DB Name | Host (Docker Network) | External Host Port | Default Credentials |
+| :--- | :--- | :--- | :--- | :--- |
+| **auth-service** | `nexus_auth_db` | `auth-db` | `5433` | `postgres` / `password` |
+| **product-service** | `nexus_product_db` | `product-db` | `5435` | `postgres` / `password` |
+| **order-service** | `nexus_order_db` | `order-db` | `5434` | `postgres` / `password` |
+| **payment-service** | `nexus_payment_db` | `payment-db` | `5436` | `postgres` / `password` |
 
 ---
 
-## 🤝 Contributing
+## 🎓 Academic Course Context
 
-1. Fork the repository
-2. Create a feature branch: `git checkout -b feature/your-feature`
-3. Commit your changes: `git commit -m 'Add some feature'`
-4. Push to the branch: `git push origin feature/your-feature`
-5. Open a Pull Request
+This project was developed as a **Mini Project** for **IT41073 – Service Oriented Computing** (Semester 6). It demonstrates key SOA and Enterprise Microservices design principles:
+
+- **Loose Coupling & Service Autonomy** – Microservices communicate exclusively via lightweight RESTful contracts through the Central API Gateway.
+- **High Cohesion & Domain Ownership** – Each service manages its own business domain, entities, and business logic.
+- **Database-per-Service Pattern** – Complete data segregation with zero cross-database queries or shared databases.
+- **API Gateway & Edge Routing** – Centralized entry point handling global CORS, authentication checks, and Redis rate limiting (`HTTP 429` enforcement).
+- **Independent Deployability & Containerization** – Every service features multi-stage `Dockerfile` definitions orchestrated via root `docker-compose.yml`.
 
 ---
 
 ## 📄 License
 
-This project is for academic purposes under IT41073 – Service Oriented Computing.
+This repository is maintained for academic evaluation and demonstration purposes under course **IT41073 – Service Oriented Computing**.

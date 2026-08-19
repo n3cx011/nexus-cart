@@ -1,4 +1,4 @@
-package com.nexuscart.auth_service.config;
+package com.nexuscart.product_service.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -6,11 +6,10 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
-
-import java.util.List;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Configuration
 public class OpenApiConfig {
@@ -19,12 +18,12 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .servers(List.of(
-                    new Server().url("http://localhost:8080").description("API Gateway")
-            ))
+                        new Server().url("http://localhost:8080").description("API Gateway")
+                ))
                 .info(new Info()
-                        .title("Auth Service API")
+                        .title("Product Service API")
                         .version("1.0")
-                        .description("Authentication and User Management Microservice Documentation"))
+                        .description("Product Catalog and Inventory Microservice Documentation"))
                 .addSecurityItem(new SecurityRequirement()
                         .addList("ApiKeyScheme")
                         .addList("BearerAuthScheme"))

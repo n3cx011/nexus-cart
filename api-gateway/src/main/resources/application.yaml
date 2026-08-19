@@ -8,9 +8,11 @@ spring:
     redis:
       host: redis
       port: 6379
+
   cloud:
     gateway:
       routes:
+        # Auth Service Route
         - id: auth-service
           uri: http://auth-service:8081
           predicates:
@@ -23,42 +25,55 @@ spring:
                 key-resolver: "#{@userRemoteAddressResolver}"
             - RewritePath=/v3/api-docs/auth, /v3/api-docs
 
+        # Product Service Route
         - id: product-service
           uri: http://product-service:8082
           predicates:
-            - Path=/products/**
+            - Path=/products/**, /v3/api-docs/product
           filters:
             - name: RequestRateLimiter
               args:
-                redis-rate-limiter.replenishRate: 1
-                redis-rate-limiter.burstCapacity: 3
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
                 key-resolver: "#{@userRemoteAddressResolver}"
+            - RewritePath=/v3/api-docs/product, /v3/api-docs
 
+        # Order Service Route
         - id: order-service
           uri: http://order-service:8083
           predicates:
-            - Path=/orders/**, /cart/**
+            - Path=/orders/**, /cart/**, /v3/api-docs/order
           filters:
             - name: RequestRateLimiter
               args:
                 redis-rate-limiter.replenishRate: 10
                 redis-rate-limiter.burstCapacity: 20
                 key-resolver: "#{@userRemoteAddressResolver}"
+            - RewritePath=/v3/api-docs/order, /v3/api-docs
 
+        # Payment Service Route
         - id: payment-service
           uri: http://payment-service:8084
           predicates:
-            - Path=/payments/**
+            - Path=/payments/**, /v3/api-docs/payment
           filters:
             - name: RequestRateLimiter
               args:
                 redis-rate-limiter.replenishRate: 10
                 redis-rate-limiter.burstCapacity: 20
                 key-resolver: "#{@userRemoteAddressResolver}"
+            - RewritePath=/v3/api-docs/payment, /v3/api-docs
 
+# Swagger Aggregation Config
 springdoc:
   swagger-ui:
     path: /swagger-ui.html
     urls:
       - name: Auth Service
         url: /v3/api-docs/auth
+      - name: Product Service
+        url: /v3/api-docs/product
+      - name: Order Service
+        url: /v3/api-docs/order
+      - name: Payment Service
+        url: /v3/api-docs/payment
